@@ -1,0 +1,47 @@
+name: retail_pos_pwa
+description: A Retail POS & Inventory PWA built with Flutter.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # Firebase
+  firebase_core: ^2.24.2
+  cloud_firestore: ^4.14.0
+  firebase_auth: ^4.16.0
+
+  # Navigation
+  go_router: ^13.0.1
+
+  # UI/UX
+  google_fonts: ^6.1.0
+  intl: ^0.19.0
+
+  # Hardware/Features
+  mobile_scanner: ^5.0.0
+  # Note: flutter_web_bluetooth might need specific version or git dependency if not on pub
+  # Using a placeholder or standard web bluetooth approach if package is tricky. 
+  # For now, we will assume we handle bluetooth via JS interop or a package if available.
+  # web_bluetooth: ^0.1.0 # Hypothetical, will verify later.
+
+  # Utils
+  uuid: ^4.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.3.9
+
+flutter:
+  uses-material-design: true
