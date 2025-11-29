@@ -28,10 +28,7 @@ dependencies:
 
   # Hardware/Features
   mobile_scanner: ^5.0.0
-  # Note: flutter_web_bluetooth might need specific version or git dependency if not on pub
-  # Using a placeholder or standard web bluetooth approach if package is tricky. 
-  # For now, we will assume we handle bluetooth via JS interop or a package if available.
-  # web_bluetooth: ^0.1.0 # Hypothetical, will verify later.
+  flutter_web_bluetooth: ^0.4.0
 
   # Utils
   uuid: ^4.2.2

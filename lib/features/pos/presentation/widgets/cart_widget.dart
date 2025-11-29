@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../domain/providers/cart_provider.dart';
 import '../../../../core/services/bluetooth_service.dart';
 import '../../../../core/utils/receipt_generator.dart';
@@ -39,10 +40,43 @@ class CartWidget extends ConsumerWidget {
                     final item = cartItems[index];
                     return ListTile(
                       title: Text(item.product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('${item.quantity} x \$${item.product.price.toStringAsFixed(2)}'),
-                      trailing: Text(
-                        '\$${item.total.toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      subtitle: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline),
+                            onPressed: () => cartNotifier.decrementProduct(item.product),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            iconSize: 20,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text('${item.quantity}'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add_circle_outline),
+                            onPressed: () => cartNotifier.addProduct(item.product),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            iconSize: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text('x \$${item.product.price.toStringAsFixed(2)}'),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '\$${item.total.toStringAsFixed(2)}',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => cartNotifier.removeProduct(item.product),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -92,7 +126,7 @@ class CartWidget extends ConsumerWidget {
                         final generator = ReceiptGenerator();
                         
                         // Create Sale Object
-                        final saleId = DateTime.now().millisecondsSinceEpoch.toString(); // Simple ID
+                        final saleId = const Uuid().v4();
                         final sale = Sale(
                           id: saleId,
                           timestamp: DateTime.now(),
@@ -116,26 +150,36 @@ class CartWidget extends ConsumerWidget {
                               SnackBar(content: Text('Error saving sale: $e')),
                             );
                           }
-                          return; // Stop if save fails? Or continue to print?
+                          return;
                         }
 
                         // Try to connect & Print
-                        final connected = await bluetooth.connect();
-                        if (connected) {
-                          final bytes = generator.generateReceipt(cartItems, cartNotifier.totalAmount);
-                          await bluetooth.printData(bytes);
-                          
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sale Saved & Receipt Sent')),
-                            );
+                        // Note: In a real app, we might want to separate printing from saving
+                        // or handle print failures more gracefully without blocking the flow.
+                        try {
+                          final connected = await bluetooth.connect();
+                          if (connected) {
+                            final bytes = generator.generateReceipt(cartItems, cartNotifier.totalAmount);
+                            await bluetooth.printData(bytes);
+                            
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Sale Saved & Receipt Sent')),
+                              );
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Sale Saved. Printer Connection Failed')),
+                              );
+                            }
                           }
-                        } else {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sale Saved. Printer Connection Failed')),
-                            );
-                          }
+                        } catch (e) {
+                           if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Printer Error: $e')),
+                              );
+                            }
                         }
                         
                         // Clear cart
@@ -144,6 +188,7 @@ class CartWidget extends ConsumerWidget {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
                       ),
                       child: const Text('CHECKOUT & PRINT'),
                     ),

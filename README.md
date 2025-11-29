@@ -28,9 +28,15 @@ A Flutter-based Progressive Web App (PWA) designed for mid-level retail shops. F
 3.  **Running the App**:
     - For Chrome (Web):
       ```bash
-      flutter run -d chrome --web-renderer html
+      flutter run -d chrome --web-port 55555 --web-renderer html
       ```
       *Note: Web Bluetooth requires a secure context (HTTPS) or `localhost`.*
+
+4.  **Installing as PWA**:
+    - Once the app is running in Chrome:
+    - Look for the **Install icon** (computer with down arrow) in the address bar.
+    - Click **Install**.
+    - The app will now launch as a standalone desktop application.
 
 ## Architecture
 

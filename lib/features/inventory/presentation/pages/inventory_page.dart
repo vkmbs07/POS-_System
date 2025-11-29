@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../pos/data/repositories/product_repository.dart';
-import '../../../pos/data/models/product.dart';
-import 'package:uuid/uuid.dart';
+import 'package:go_router/go_router.dart';
+import '../../pos/data/repositories/product_repository.dart';
+import '../controllers/product_controller.dart';
 
 class InventoryPage extends ConsumerWidget {
   const InventoryPage({super.key});
@@ -12,164 +12,75 @@ class InventoryPage extends ConsumerWidget {
     final productsAsync = ref.watch(productsStreamProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventory Management')),
+      appBar: AppBar(
+        title: const Text('Inventory'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go('/inventory/add'),
+        child: const Icon(Icons.add),
+      ),
       body: productsAsync.when(
-        data: (products) => ListView.separated(
-          itemCount: products.length,
-          separatorBuilder: (ctx, i) => const Divider(),
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ListTile(
-              leading: Container(
-                width: 50,
-                height: 50,
-                color: Colors.grey[200],
-                child: product.imageUrl != null
-                    ? Image.network(product.imageUrl!, fit: BoxFit.cover)
-                    : const Icon(Icons.image),
-              ),
-              title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text('Barcode: ${product.barcode} | Stock: ${product.stockQty}'),
-              trailing: Text('\$${product.price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
-              onTap: () => _showProductDialog(context, ref, product: product),
-            );
-          },
-        ),
+        data: (products) {
+          if (products.isEmpty) {
+            return const Center(child: Text('No products found. Add one!'));
+          }
+          return ListView.builder(
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final product = products[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: product.imageUrl != null
+                      ? NetworkImage(product.imageUrl!)
+                      : null,
+                  child: product.imageUrl == null
+                      ? Text(product.name[0].toUpperCase())
+                      : null,
+                ),
+                title: Text(product.name),
+                subtitle: Text('Stock: ${product.stockQty} | \$${product.price.toStringAsFixed(2)}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => context.go('/inventory/edit', extra: product),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete Product'),
+                            content: Text('Are you sure you want to delete ${product.name}?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          await ref.read(productControllerProvider.notifier).deleteProduct(product.id);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showProductDialog(context, ref),
-        child: const Icon(Icons.add),
-      ),
     );
-  }
-
-  void _showProductDialog(BuildContext context, WidgetRef ref, {Product? product}) {
-    showDialog(
-      context: context,
-      builder: (context) => _ProductDialog(ref: ref, product: product),
-    );
-  }
-}
-
-class _ProductDialog extends StatefulWidget {
-  final WidgetRef ref;
-  final Product? product;
-
-  const _ProductDialog({required this.ref, this.product});
-
-  @override
-  State<_ProductDialog> createState() => _ProductDialogState();
-}
-
-class _ProductDialogState extends State<_ProductDialog> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameCtrl;
-  late TextEditingController _barcodeCtrl;
-  late TextEditingController _priceCtrl;
-  late TextEditingController _stockCtrl;
-  late TextEditingController _categoryCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameCtrl = TextEditingController(text: widget.product?.name ?? '');
-    _barcodeCtrl = TextEditingController(text: widget.product?.barcode ?? '');
-    _priceCtrl = TextEditingController(text: widget.product?.price.toString() ?? '');
-    _stockCtrl = TextEditingController(text: widget.product?.stockQty.toString() ?? '');
-    _categoryCtrl = TextEditingController(text: widget.product?.category ?? '');
-  }
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _barcodeCtrl.dispose();
-    _priceCtrl.dispose();
-    _stockCtrl.dispose();
-    _categoryCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isEditing = widget.product != null;
-
-    return AlertDialog(
-      title: Text(isEditing ? 'Edit Product' : 'Add Product'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Product Name'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
-              ),
-              TextFormField(
-                controller: _barcodeCtrl,
-                decoration: const InputDecoration(labelText: 'Barcode'),
-                validator: (v) => v!.isEmpty ? 'Required' : null,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _priceCtrl,
-                      decoration: const InputDecoration(labelText: 'Price'),
-                      keyboardType: TextInputType.number,
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _stockCtrl,
-                      decoration: const InputDecoration(labelText: 'Stock Qty'),
-                      keyboardType: TextInputType.number,
-                      validator: (v) => v!.isEmpty ? 'Required' : null,
-                    ),
-                  ),
-                ],
-              ),
-              TextFormField(
-                controller: _categoryCtrl,
-                decoration: const InputDecoration(labelText: 'Category'),
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('CANCEL'),
-        ),
-        ElevatedButton(
-          onPressed: _save,
-          child: const Text('SAVE'),
-        ),
-      ],
-    );
-  }
-
-  void _save() {
-    if (_formKey.currentState!.validate()) {
-      final id = widget.product?.id ?? const Uuid().v4();
-      final product = Product(
-        id: id,
-        name: _nameCtrl.text,
-        barcode: _barcodeCtrl.text,
-        price: double.tryParse(_priceCtrl.text) ?? 0.0,
-        stockQty: int.tryParse(_stockCtrl.text) ?? 0,
-        category: _categoryCtrl.text,
-        imageUrl: widget.product?.imageUrl, // Keep existing or null
-      );
-
-      widget.ref.read(productRepositoryProvider).addProduct(product);
-      Navigator.pop(context);
-    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/repositories/reports_repository.dart';
+import '../../data/repositories/reports_repository.dart';
+import '../../pos/data/models/sale.dart';
 
 class ReportsPage extends ConsumerWidget {
   const ReportsPage({super.key});
