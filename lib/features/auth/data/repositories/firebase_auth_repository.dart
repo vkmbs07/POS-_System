@@ -1,18 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rxdart/rxdart.dart';
 import '../models/user_model.dart';
-import 'package:rxdart/rxdart.dart'; // Needed for switchMap
+import 'auth_repository.dart';
 
-class AuthRepository {
+class FirebaseAuthRepository implements AuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 
-  AuthRepository(this._auth, this._firestore);
+  FirebaseAuthRepository(this._auth, this._firestore);
 
+  @override
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Stream of the current user's profile (including shopId)
+  @override
   Stream<UserModel?> get userProfileStream {
     return _auth.authStateChanges().switchMap((user) {
       if (user == null) return Stream.value(null);
@@ -27,10 +29,12 @@ class AuthRepository {
     });
   }
 
+  @override
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
+  @override
   Future<void> signUpWithEmailAndPassword(String email, String password, {String? shopId}) async {
     final credential = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -70,13 +74,14 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<void> signOut() async {
     await _auth.signOut();
   }
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(FirebaseAuth.instance, FirebaseFirestore.instance);
+  return FirebaseAuthRepository(FirebaseAuth.instance, FirebaseFirestore.instance);
 });
 
 final authStateProvider = StreamProvider<User?>((ref) {
