@@ -14,25 +14,27 @@ class BluetoothService {
 
   Future<bool> connect() async {
     try {
-      final isAvailable = await FlutterWebBluetooth.instance.isAvailable;
+      final isAvailable = await FlutterWebBluetooth.instance.isAvailable.first;
       if (!isAvailable) {
         print('Web Bluetooth not available');
         return false;
       }
 
       final device = await FlutterWebBluetooth.instance.requestDevice(
-        filters: [
-          BluetoothScanFilter.create(
-            services: [
-              '000018f0-0000-1000-8000-00805f9b34fb', 
-              'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-            ],
-          ),
-        ],
-        optionalServices: [
-           '000018f0-0000-1000-8000-00805f9b34fb',
-           'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
-        ], 
+        RequestOptionsBuilder(
+          [
+            RequestFilterBuilder(
+              services: [
+                '000018f0-0000-1000-8000-00805f9b34fb', 
+                'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+              ],
+            ),
+          ],
+          optionalServices: [
+             '000018f0-0000-1000-8000-00805f9b34fb',
+             'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
+          ], 
+        ),
       );
 
       await device.connect();
@@ -61,7 +63,7 @@ class BluetoothService {
         return true;
       } else {
         print('No writable characteristic found');
-        await device.disconnect();
+        device.disconnect();
         return false;
       }
     } catch (e) {

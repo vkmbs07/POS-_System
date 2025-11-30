@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/reports_repository.dart';
-import '../../../pos/data/models/sale.dart';
+
 
 class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
@@ -70,7 +70,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
           Expanded(
             child: salesAsync.when(
               data: (sales) {
-                final totalAmount = sales.fold(0.0, (sum, sale) => sum + sale.totalAmount);
+                final totalAmount = sales.fold<double>(0.0, (sum, sale) => sum + sale.totalAmount);
                 final totalOrders = sales.length;
 
                 return Padding(

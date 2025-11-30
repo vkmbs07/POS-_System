@@ -106,6 +106,7 @@ class PosPage extends ConsumerWidget {
         backgroundColor: Colors.black,
         child: const Icon(Icons.add, color: Colors.white),
       ),
+      ),
     );
   }
 }

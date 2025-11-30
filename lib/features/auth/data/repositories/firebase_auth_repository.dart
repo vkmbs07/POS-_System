@@ -1,3 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rxdart/rxdart.dart';
+import 'auth_repository.dart';
+import '../models/user_model.dart';
+
+export 'auth_repository.dart';
+
+class FirebaseAuthRepository implements AuthRepository {
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  FirebaseAuthRepository(this._auth, this._firestore);
 
   @override
   Stream<User?> get authStateChanges => _auth.authStateChanges();
