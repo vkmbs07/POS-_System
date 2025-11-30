@@ -14,14 +14,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _shopIdController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _shopIdController.dispose();
@@ -31,7 +29,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       await ref.read(authControllerProvider.notifier).signup(
-            _emailController.text.trim(),
             _emailController.text.trim(),
             _passwordController.text.trim(),
             shopId: _shopIdController.text.trim().isEmpty ? null : _shopIdController.text.trim(),
