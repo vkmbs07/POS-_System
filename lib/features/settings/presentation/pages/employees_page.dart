@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../auth/data/repositories/firebase_auth_repository.dart';
-import '../../auth/data/models/user_model.dart';
+import '../../../auth/data/repositories/firebase_auth_repository.dart';
+import '../../../auth/data/models/user_model.dart';
 
 class EmployeesPage extends ConsumerWidget {
   const EmployeesPage({super.key});
