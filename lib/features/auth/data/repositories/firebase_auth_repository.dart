@@ -1,54 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'auth_repository.dart';
-
-class FirebaseAuthRepository implements AuthRepository {
-  final FirebaseAuth _firebaseAuth;
-
-  FirebaseAuthRepository(this._firebaseAuth);
-
-  @override
-  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
-
-  @override
-  User? get currentUser => _firebaseAuth.currentUser;
-
-  @override
-  Future<User?> signInWithEmailAndPassword(String email, String password) async {
-    try {
-      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return userCredential.user;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
-
-  @override
-  Future<User?> signUpWithEmailAndPassword(String email, String password) async {
-    try {
-      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return userCredential.user;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
-
-  @override
-  Future<void> signOut() async {
-    await _firebaseAuth.signOut();
-  }
-
-  Exception _handleAuthException(FirebaseAuthException e) {
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
+import 'package:rxdart/rxdart.dart'; // Needed for switchMap
 
 class AuthRepository {
   final FirebaseAuth _auth;

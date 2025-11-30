@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/data/repositories/firebase_auth_repository.dart';
+import '../../../auth/data/repositories/firebase_auth_repository.dart';
 import '../models/sale.dart';
 
 class SalesRepository {
