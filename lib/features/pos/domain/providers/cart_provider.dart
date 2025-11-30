@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/product.dart';
+import '../../data/models/product.dart';
 
 class CartItem {
   final Product product;

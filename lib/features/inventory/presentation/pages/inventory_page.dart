@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../pos/data/repositories/product_repository.dart';
+import '../../../pos/data/repositories/product_repository.dart';
 import '../controllers/product_controller.dart';
 
 class InventoryPage extends ConsumerWidget {
