@@ -1,23 +1,44 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if user is authenticated
+    
+    // Helper: Check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper function to check if the user is accessing their own shop data
+    // Helper: Check if user is the Owner of the shop
     function isOwner(shopId) {
       return isAuthenticated() && request.auth.uid == shopId;
     }
 
-    // Match the shop document where the document ID is the user's UID
-    match /shops/{shopId} {
-      allow read, write: if isOwner(shopId);
+    // Helper: Check if user is an Employee of the shop
+    // Looks up the user's profile to see if their shop_id matches
+    function isEmployee(shopId) {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.shop_id == shopId;
+    }
 
-      // Allow access to all subcollections (products, sales, etc.) of the shop
+    // Helper: Check if user has access (Owner OR Employee)
+    function hasAccess(shopId) {
+      return isOwner(shopId) || isEmployee(shopId);
+    }
+
+    // 1. User Profiles
+    // Users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      // Allow searching users by shop_id (needed for Employee List)
+      allow list: if isAuthenticated(); 
+    }
+
+    // 2. Shops
+    match /shops/{shopId} {
+      allow read, write: if hasAccess(shopId);
+
+      // Subcollections (products, sales, settings, etc.)
       match /{document=**} {
-        allow read, write: if isOwner(shopId);
+        allow read, write: if hasAccess(shopId);
       }
     }
     

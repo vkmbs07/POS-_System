@@ -47,6 +47,18 @@ class PosPage extends ConsumerWidget {
               },
             ),
             IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                context.push('/settings');
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.people),
+              onPressed: () {
+                context.push('/employees');
+              },
+            ),
+            IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
                 ref.read(authRepositoryProvider).signOut();

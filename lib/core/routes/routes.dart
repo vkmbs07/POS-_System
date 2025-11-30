@@ -6,6 +6,8 @@ import '../../features/inventory/presentation/pages/inventory_page.dart';
 import '../../features/inventory/presentation/pages/add_edit_product_page.dart';
 import '../../features/pos/data/models/product.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/settings/presentation/pages/employees_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/data/repositories/firebase_auth_repository.dart';
@@ -48,6 +50,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reports',
         builder: (context, state) => const ReportsPage(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/employees',
+        builder: (context, state) => const EmployeesPage(),
       ),
     ],
     redirect: (context, state) {

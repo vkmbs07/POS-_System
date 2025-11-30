@@ -1,13 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/data/repositories/firebase_auth_repository.dart';
-import '../models/product.dart';
-
-class ProductRepository {
-  final FirebaseFirestore _firestore;
-  final String? _userId;
-
   ProductRepository(this._firestore, this._userId);
 
   CollectionReference<Map<String, dynamic>>? get _productsCollection {
@@ -61,8 +51,8 @@ class ProductRepository {
 }
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  return ProductRepository(FirebaseFirestore.instance, user?.uid);
+  final userProfile = ref.watch(userProfileProvider).value;
+  return ProductRepository(FirebaseFirestore.instance, userProfile?.shopId);
 });
 
 final productsStreamProvider = StreamProvider<List<Product>>((ref) {

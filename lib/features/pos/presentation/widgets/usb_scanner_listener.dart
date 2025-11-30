@@ -52,8 +52,10 @@ class _UsbScannerListenerState extends ConsumerState<UsbScannerListener> {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure focus is kept for listening
-    if (!_focusNode.hasFocus) {
+    // Ensure focus is kept for listening, but don't fight for it aggressively
+    // if another text field (like manual entry) has it.
+    // We only request focus if NO node has focus.
+    if (!_focusNode.hasFocus && FocusScope.of(context).focusedChild == null) {
       FocusScope.of(context).requestFocus(_focusNode);
     }
 

@@ -27,6 +27,6 @@ class SalesRepository {
 }
 
 final salesRepositoryProvider = Provider<SalesRepository>((ref) {
-  final user = ref.watch(authStateProvider).value;
-  return SalesRepository(FirebaseFirestore.instance, user?.uid);
+  final userProfile = ref.watch(userProfileProvider).value;
+  return SalesRepository(FirebaseFirestore.instance, userProfile?.shopId);
 });

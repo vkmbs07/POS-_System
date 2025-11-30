@@ -12,9 +12,9 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     state = await AsyncValue.guard(() => _authRepository.signInWithEmailAndPassword(email, password));
   }
 
-  Future<void> signup(String email, String password) async {
+  Future<void> signup(String email, String password, {String? shopId}) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _authRepository.signUpWithEmailAndPassword(email, password));
+    state = await AsyncValue.guard(() => _authRepository.signUpWithEmailAndPassword(email, password, shopId: shopId));
   }
 
   Future<void> logout() async {

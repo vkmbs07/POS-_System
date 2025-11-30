@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import '../../features/pos/domain/providers/cart_provider.dart';
+import '../../features/settings/data/models/shop_settings.dart';
 
 class ReceiptGenerator {
   // ESC/POS Commands
@@ -7,7 +8,7 @@ class ReceiptGenerator {
   static const int _gs = 29;
   static const int _lf = 10;
 
-  List<int> generateReceipt(List<CartItem> items, double total) {
+  List<int> generateReceipt(List<CartItem> items, double total, ShopSettings settings) {
     List<int> bytes = [];
 
     // Init
@@ -15,9 +16,12 @@ class ReceiptGenerator {
 
     // Center Align
     bytes += [_esc, 97, 1];
-    bytes += _text('RETAIL SHOP\n');
-    bytes += _text('123 Market Street\n');
-    bytes += _text('Tel: 555-0123\n\n');
+    bytes += _text('${settings.shopName}\n');
+    bytes += _text('${settings.address}\n');
+    bytes += _text('Tel: ${settings.phone}\n');
+    if (settings.email != null) bytes += _text('Email: ${settings.email}\n');
+    if (settings.website != null) bytes += _text('${settings.website}\n');
+    bytes += _text('\n');
 
     // Left Align
     bytes += [_esc, 97, 0];

@@ -6,6 +6,7 @@ import '../../../../core/services/bluetooth_service.dart';
 import '../../../../core/utils/receipt_generator.dart';
 import '../../data/repositories/sales_repository.dart';
 import '../../data/models/sale.dart';
+import '../../../../features/settings/data/repositories/settings_repository.dart';
 
 class CartWidget extends ConsumerWidget {
   const CartWidget({super.key});
@@ -159,7 +160,11 @@ class CartWidget extends ConsumerWidget {
                         try {
                           final connected = await bluetooth.connect();
                           if (connected) {
-                            final bytes = generator.generateReceipt(cartItems, cartNotifier.totalAmount);
+                            // Fetch settings for receipt
+                            final settingsRepo = ref.read(settingsRepositoryProvider);
+                            final settings = await settingsRepo.getSettings();
+
+                            final bytes = generator.generateReceipt(cartItems, cartNotifier.totalAmount, settings);
                             await bluetooth.printData(bytes);
                             
                             if (context.mounted) {

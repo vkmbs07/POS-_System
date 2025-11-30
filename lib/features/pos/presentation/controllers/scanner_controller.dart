@@ -12,8 +12,17 @@ class ScannerController extends StateNotifier<void> {
 
   ScannerController(this.ref) : super(null);
 
+  DateTime? _lastScanTime;
+
   Future<void> onScan(String barcode) async {
     if (barcode.isEmpty) return;
+
+    // Debounce: Ignore scans within 1.5 seconds of the last successful scan
+    final now = DateTime.now();
+    if (_lastScanTime != null && 
+        now.difference(_lastScanTime!).inMilliseconds < 1500) {
+      return;
+    }
 
     // Find product by barcode
     // Note: In a real app, we might want to optimize this lookup 
@@ -24,6 +33,7 @@ class ScannerController extends StateNotifier<void> {
       try {
         final product = products.firstWhere((p) => p.barcode == barcode);
         ref.read(cartProvider.notifier).addProduct(product);
+        _lastScanTime = now; // Update last scan time only on success
         // Optional: Play beep sound or show snackbar
       } catch (e) {
         // Product not found
